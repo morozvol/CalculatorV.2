@@ -16,9 +16,23 @@ namespace Calculator_v._2
                 Console.ReadKey();
                 return;
             }
-
+            while(!is_simple(task))
             task = simplify(task);
+            Console.WriteLine(task);
             Console.ReadKey();
+        }
+
+        public static bool is_simple(string task)
+        {
+            try
+            {
+                double.Parse(task);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         public static string simplify(string task)
@@ -34,7 +48,10 @@ namespace Calculator_v._2
                         CloseBracket = i;
 
                         string c2 = "(" + task.Substring(OpenBracket, CloseBracket - OpenBracket) + ")";
-                        task.Replace(c2, simplify(c2.Substring(1, c2.Length - 2)));
+                        task=task.Replace(c2, simplify(c2.Substring(1, c2.Length - 2)));
+                        Console.WriteLine(task);
+                        
+
                         return task;
                     }
                 }
@@ -42,14 +59,10 @@ namespace Calculator_v._2
             }
             else
             {
+                var operations = SplitIntoOperation(task);
+                var main = ChooseTheMain(operations);  
+                task= main.ChangeCondition(task);
                 
-                var operations =SplitIntoOperation(task);
-                ChooseTheMain(operations);
-                   
-                ChangeCondition(task);
-                Calculator.Calculate();
-
-                Console.WriteLine(task);
             }
             return task;
         }
@@ -63,8 +76,17 @@ namespace Calculator_v._2
             List<Operation> Operations=new List<Operation>();
            for (int j = 0; j < Numbers.Length-1; j++)
            {
-               Operations.Add(new Operation(double.Parse(Numbers[j]), double.Parse(Numbers[j+1]),Сharacters[i][0]));
-               i++;
+               try
+               {
+                   Operations.Add(new Operation(double.Parse(Numbers[j]), double.Parse(Numbers[j + 1]), Сharacters[i][0]));
+                   i++;
+               }
+               catch (FormatException)
+               {
+                   j++;
+                   Operations.Add(new Operation(double.Parse(Numbers[j])));
+                   i++;
+                }
            }
            
             return Operations;
@@ -83,17 +105,17 @@ namespace Calculator_v._2
 
     class Calculator
     {
-        public static Result Calculate(Operation op)
+        public static double Calculate(Operation op)
         {
             switch (op.Options)
             {
                 case '+':
-                    return new Result(op.Number1,op.Number2,op.Options, op.Number1 + op.Number2);
+                    return op.Number1 + op.Number2;
                 case '-':
-                    return new Result(op.Number1, op.Number2, op.Options,  op.Number1 - op.Number2);
+                    return  op.Number1 - op.Number2;
                    
                 case '*':
-                    return new Result(op.Number1, op.Number2, op.Options, op.Number1 * op.Number2);
+                  return  op.Number1 * op.Number2;
                   
                 case '/':
                     if (op.Number2 == 0)
@@ -102,7 +124,7 @@ namespace Calculator_v._2
                     }
                    break;
             }
-            return new Result(op.Number1, op.Number2, op.Options, op.Number1 / op.Number2);
+            return op.Number1 / op.Number2;
         }
     }
 
@@ -126,30 +148,30 @@ namespace Calculator_v._2
         {
             get { return number2; }
         }
+        public string result
+        {
+            get { return Res; }
+        }
+
+        public string ChangeCondition(string task)
+        {
+            return task.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), result);
+        }
 
         public Operation(double num1, double num2, char option)
         {
             number1 = num1;
             number2 = num2;
             this.option = option;
+            Res = Calculator.Calculate(this).ToString();
+        }
+        public Operation(double num1)
+        {
+            number1 = num1;
+            number2 = 1;
+            this.option = '*';
+            Res = number1.ToString();
         }
     }
 
-    class Result : Operation
-        {
-            private string Res;
-            public Result(double num1, double num2, char option,double res) : base(num1, num2, option)
-            {
-               Res=res.ToString();
-            }
-            public string result
-            {
-                get { return Res; }
-            }
-
-            public string ChangeCondition( string task)
-            {
-            return task.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), result);
-            }
-    }
 }
