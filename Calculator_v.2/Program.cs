@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace Calculator_v._2
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            string task;
+            var task = "";
             task = Console.ReadLine();
             if (task.Split('(', ')').Length % 2 == 0)
             {
@@ -16,9 +16,10 @@ namespace Calculator_v._2
                 Console.ReadKey();
                 return;
             }
-            while(!is_simple(task))
-            task = simplify(task);
-            Console.WriteLine(task);
+
+            while (!is_simple(task))
+                task = Simplify(task);
+            Console.WriteLine("= {}",task);
             Console.ReadKey();
         }
 
@@ -32,74 +33,78 @@ namespace Calculator_v._2
             {
                 return false;
             }
+
             return true;
         }
 
-        public static string simplify(string task)
+        public static string Simplify(string task)
         {
             if (task.Contains("("))
             {
-                byte OpenBracket = 0, CloseBracket = 0;
+                byte openBracket = 0, closeBracket;
                 for (byte i = 0; i < task.Length; i++)
                 {
-                    if (task[i] == '(') OpenBracket = (byte) (i + 1);
+                    if (task[i] == '(') openBracket = (byte) (i + 1);
                     if (task[i] == ')')
                     {
-                        CloseBracket = i;
-
-                        string c2 = "(" + task.Substring(OpenBracket, CloseBracket - OpenBracket) + ")";
-                        task=task.Replace(c2, simplify(c2.Substring(1, c2.Length - 2)));
-                        Console.WriteLine(task);
-                        
-
+                        closeBracket = i;
+                        var c2 = "(" + task.Substring(openBracket, closeBracket - openBracket) + ")";
+                        task = task.Replace(c2, Simplify(c2.Substring(1, c2.Length - 2)));
+                        task = task.Replace("+-", "-");
+                        task = task.Replace("-+", "-");
+                        task = task.Replace("--", "+");
+                        //Console.WriteLine(task);
                         return task;
                     }
                 }
-
             }
             else
             {
-                var operations = SplitIntoOperation(task);
-                var main = ChooseTheMain(operations);  
-                task= main.ChangeCondition(task);
-                
+                while (!is_simple(task))
+                {
+                    var operations = SplitIntoOperation(task);
+                    var main = ChooseTheMain(operations);
+                    task = main.ChangeCondition(task);
+                }
             }
             return task;
         }
+
         public static List<Operation> SplitIntoOperation(string task)
         {
-            string task_Cpy = task;
-           var Numbers = task.Split('+', '-', '/', '*');
-           var Сharacters = task_Cpy.Split("0123456789.,".ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
-           int i = 0;
-
-            List<Operation> Operations=new List<Operation>();
-           for (int j = 0; j < Numbers.Length-1; j++)
-           {
-               try
-               {
-                   Operations.Add(new Operation(double.Parse(Numbers[j]), double.Parse(Numbers[j + 1]), Сharacters[i][0]));
-                   i++;
-               }
-               catch (FormatException)
-               {
-                   j++;
-                   Operations.Add(new Operation(double.Parse(Numbers[j])));
-                   i++;
+            //  Console.WriteLine(task);
+            string taskCpy = task;
+            var numbers = task.Split("/*-+".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var characters = taskCpy.Split("0123456789.,".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            int i = 0;
+            List<Operation> Operations = new List<Operation>();
+            for (int j = 0; j < numbers.Length - 1; j++)
+            {
+                try
+                {
+                    Operations.Add(new Operation(double.Parse(numbers[j]), double.Parse(numbers[j + 1]),
+                        characters[i][0]));
+                    i++;
                 }
-           }
-           
+                catch (FormatException)
+                {
+                    Console.WriteLine("Вырожение введено неверно!");
+                    Console.ReadKey();
+                    Environment.Exit(0);
+                }
+            }
+
             return Operations;
         }
 
-        public static Operation ChooseTheMain(List<Operation> Operations) //главное действие
+        public static Operation ChooseTheMain(List<Operation> operations)
         {
-            foreach (var op in Operations)
+            foreach (var op in operations)
             {
                 if (op.Options == '/' || op.Options == '*') return op;
             }
 
-            return Operations[0];
+            return operations[0];
         }
     }
 
@@ -112,66 +117,45 @@ namespace Calculator_v._2
                 case '+':
                     return op.Number1 + op.Number2;
                 case '-':
-                    return  op.Number1 - op.Number2;
-                   
+                    return op.Number1 - op.Number2;
+
                 case '*':
-                  return  op.Number1 * op.Number2;
-                  
+                    return op.Number1 * op.Number2;
+
                 case '/':
-                    if (op.Number2 == 0)
+                    if (op.Number2.Equals(0))
                     {
                         Console.WriteLine("делить на ноль нельзя");
                     }
-                   break;
+
+                    break;
             }
+
             return op.Number1 / op.Number2;
         }
     }
 
     class Operation
     {
-        private double number1, number2;
-        private char option;
-        private string Res;
+        public char Options { get; }
 
-        public Char Options
-        {
-            get { return option; }
-        }
+        public double Number1 { get; }
 
-        public double Number1
-        {
-            get { return number1; }
-        }
+        public double Number2 { get; }
 
-        public double Number2
-        {
-            get { return number2; }
-        }
-        public string result
-        {
-            get { return Res; }
-        }
+        public string Result { get; }
 
         public string ChangeCondition(string task)
         {
-            return task.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), result);
+            return task.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), Result);
         }
 
         public Operation(double num1, double num2, char option)
         {
-            number1 = num1;
-            number2 = num2;
-            this.option = option;
-            Res = Calculator.Calculate(this).ToString();
-        }
-        public Operation(double num1)
-        {
-            number1 = num1;
-            number2 = 1;
-            this.option = '*';
-            Res = number1.ToString();
+            Number1 = num1;
+            Number2 = num2;
+            this.Options = option;
+            Result = Calculator.Calculate(this).ToString();
         }
     }
-
 }
