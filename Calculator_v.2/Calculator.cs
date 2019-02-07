@@ -31,7 +31,7 @@ namespace Calculator_v._2
         }
 
 
-        public bool IsSimple()
+        private bool IsSimple()
         {
             try
             {
@@ -87,7 +87,7 @@ namespace Calculator_v._2
             return Сondition;
         }
 
-        public Bracket FindTheActionIBrackets()
+        private Bracket FindTheActionIBrackets()
         {
             if (!Сondition.Contains("(") || !Сondition.Contains(")")) return new Bracket(0, 0);
             byte openBracket = 128, lenthBracket;
@@ -110,7 +110,7 @@ namespace Calculator_v._2
             return new Bracket(0, 0);
         }
 
-        public List<Operation> SplitIntoOperation()
+        private List<Operation> SplitIntoOperation()
         {
             string taskCpy = Сondition;
             var numbers = Сondition.Split("/*-+".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -135,31 +135,6 @@ namespace Calculator_v._2
             }
 
             return Operations;
-        }
-
-
-        public static double Calculate(Operation op)
-        {
-            switch (op.Options)
-            {
-                case '+':
-                    return op.Number1 + op.Number2;
-                case '-':
-                    return op.Number1 - op.Number2;
-
-                case '*':
-                    return op.Number1 * op.Number2;
-
-                case '/':
-                    if (op.Number2.Equals(0))
-                    {
-                        Console.WriteLine("делить на ноль нельзя");
-                    }
-
-                    break;
-            }
-
-            return op.Number1 / op.Number2;
         }
     }
 }

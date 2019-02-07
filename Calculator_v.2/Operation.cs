@@ -13,9 +13,9 @@ namespace Calculator_v._2
 
         public string Result { get; }
 
-        public string ChangeCondition(string task)
+        public string ChangeCondition()
         {
-            return task.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), Result);
+            return Condition.Replace(String.Format("{0}{1}{2}", Number1, Options, Number2), Result);
         }
 
         public static Operation ChooseTheMain(List<Operation> operations)
@@ -34,7 +34,30 @@ namespace Calculator_v._2
             Number2 = num2;
             this.Options = option;
 
-            Result = Calculator.Calculate(this).ToString();
+            Result = Calculate().ToString();
+        }
+        public  double Calculate()
+        {
+            switch (Options)
+            {
+                case '+':
+                    return Number1 + Number2;
+                case '-':
+                    return Number1 - Number2;
+
+                case '*':
+                    return Number1 * Number2;
+
+                case '/':
+                    if (Number2.Equals(0))
+                    {
+                        Console.WriteLine("делить на ноль нельзя");
+                    }
+
+                    break;
+            }
+
+            return Number1 / Number2;
         }
     }
 }
