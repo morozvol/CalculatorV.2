@@ -66,7 +66,14 @@ namespace Calculator_v._2
             return true;
         }
 
-        public string Simplify()
+        public string CalculateTheExpression()
+        {
+            if (IsFindErrorInTask()) Environment.Exit(0);
+            ReplaceBinaryOperator();
+            return Simplify();
+        }
+
+        private string Simplify()
         {
             while (true)
             {

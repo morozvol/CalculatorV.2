@@ -8,9 +8,7 @@ namespace Calculator_v._2
         {
             var task = Console.ReadLine().Replace(" ", string.Empty);
             Calculator calculator = new Calculator(task);
-            if(calculator.IsFindErrorInTask())return;
-            calculator.ReplaceBinaryOperator();
-            calculator.Simplify();
+            calculator.CalculateTheExpression();
 
             Console.Clear();
             Console.WriteLine("{0} = {1}",task, calculator.Сondition);
