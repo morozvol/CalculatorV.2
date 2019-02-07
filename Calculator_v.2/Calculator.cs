@@ -28,6 +28,16 @@ namespace Calculator_v._2
                 Console.ReadKey();
                 return true;
             }
+
+            try
+            {
+                Сondition = Сondition.Replace(",", ".");
+                double.Parse("45.3");
+            }
+            catch (FormatException)
+            {
+                Сondition = Сondition.Replace(".", ",");
+            }
             return false;
         }
 

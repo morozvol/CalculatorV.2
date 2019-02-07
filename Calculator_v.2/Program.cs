@@ -6,14 +6,14 @@ namespace Calculator_v._2
     {
         private static void Main()
         {
-            var task = Console.ReadLine();
-           
+            var task = Console.ReadLine().Replace(" ", string.Empty);
             Calculator calculator = new Calculator(task);
             if(calculator.IsFindErrorInTask())return;
             calculator.ReplaceBinaryOperator();
             calculator.Simplify();
 
-            Console.WriteLine("= {0}", calculator.Сondition);
+            Console.Clear();
+            Console.WriteLine("{0} = {1}",task, calculator.Сondition);
             Console.ReadKey();
         }
     }

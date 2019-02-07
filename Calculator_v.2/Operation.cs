@@ -61,6 +61,9 @@ namespace Calculator_v._2
                         Console.WriteLine("делить на ноль нельзя");
                     }
                     break;
+                default:
+                    break;
+
             }
             return Number1 / Number2;
         }
