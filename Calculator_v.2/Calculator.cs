@@ -6,30 +6,42 @@ namespace Calculator_v._2
 {
     class Calculator
     {
+        public string Сondition { get; set; }
+
         public Calculator(string task)
         {
             Сondition = task;
         }
 
-        private string _condition;
-        private bool _isPositiveValue = true;
 
-        public void ChangeSignInResponse()
+        public bool IsFindErrorInTask()
         {
-            _isPositiveValue = !_isPositiveValue;
+            if (Сondition.Length < 1)
+            { 
+                Console.WriteLine("слишком короткое выражение");
+                Console.ReadKey();
+                return true;
+            }
+            if (Сondition.Split('(', ')').Length % 2 == 0)
+            {
+                Console.WriteLine("ошибка скобок");
+                Console.ReadKey();
+                return true;
+            }
+            return false;
         }
 
-        public string Сondition
+        public void ReplaceBinaryOperator()
         {
-            get { return _condition; }
-            set { _condition = value; }
+            for (int i = 0; i < Сondition.Length; i++)
+            {
+                if (Сondition[i] == '-')
+                {
+                    if (i != 0 && Сondition[i - 1] != '(')
+                        Сondition = Сondition.Remove(i, 1).Insert(i, '~'.ToString());
+                }
+            }
         }
-
-        public bool IsPositiveValue
-        {
-            get { return _isPositiveValue; }
-        }
-
 
         private bool IsSimple()
         {
@@ -41,15 +53,7 @@ namespace Calculator_v._2
             {
                 return false;
             }
-
             return true;
-        }
-
-        private int CountWords()
-        {
-            int count = (Сondition.Length - Сondition.Replace("*-", "").Length) / 2;
-            count += (Сondition.Length - Сondition.Replace("/-", "").Length) / 2;
-            return count;
         }
 
         public string Simplify()
@@ -62,15 +66,6 @@ namespace Calculator_v._2
                     var c2 = Сondition.Substring(bracket.openBracket, bracket.lenthBracket);
                     var calculator = new Calculator(c2.Substring(1, c2.Length - 2));
                     Сondition = Сondition.Replace(c2, calculator.Simplify());
-
-
-                    if (CountWords() % 2 != 0) ChangeSignInResponse();
-
-                    Сondition = Сondition.Replace("+-", "-");
-                    Сondition = Сondition.Replace("-+", "-");
-                    Сondition = Сondition.Replace("--", "+");
-                    Сondition = Сondition.Replace("/-", "/");
-                    Сondition = Сondition.Replace("*-", "*");
                 }
             }
 
@@ -80,16 +75,14 @@ namespace Calculator_v._2
                 var main = Operation.ChooseTheMain(operations);
                 Сondition = main.ChangeCondition(Сondition);
             }
-
-            if (!IsPositiveValue)
-                Сondition = new Operation(double.Parse(Сondition), -1, '*').ChangeCondition(Сondition);
-
             return Сondition;
         }
 
         private Bracket FindTheActionIBrackets()
         {
-            if (!Сondition.Contains("(") || !Сondition.Contains(")")) return new Bracket(0, 0);
+            if (!Сondition.Contains("(") || !Сondition.Contains(")"))
+                return new Bracket(0, 0);
+
             byte openBracket = 128, lenthBracket;
             for (byte i = 0; i < Сondition.Length; i++)
             {
@@ -98,7 +91,9 @@ namespace Calculator_v._2
                 {
                     if (openBracket > i)
                     {
-                        //TODO: обработка ошибки
+                        Console.WriteLine("ошибка скобок");
+                        Console.ReadKey();
+                        Environment.Exit(0);
                         return new Bracket(0, 0);
                     }
 
@@ -106,34 +101,32 @@ namespace Calculator_v._2
                     return new Bracket(openBracket, lenthBracket);
                 }
             }
-
             return new Bracket(0, 0);
         }
 
         private List<Operation> SplitIntoOperation()
         {
-            string taskCpy = Сondition;
-            var numbers = Сondition.Split("/*-+".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            var characters = taskCpy.Split("0123456789.,".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var numbers    = Сondition.Split("/*~+".ToCharArray(),
+                StringSplitOptions.RemoveEmptyEntries);
+            var characters = Сondition.Split("0123456789.,-".ToCharArray(),
+                StringSplitOptions.RemoveEmptyEntries);
             int i = 0;
             List<Operation> Operations = new List<Operation>();
             for (int j = 0; j < numbers.Length - 1; j++)
             {
                 try
                 {
-                    Operations.Add(new Operation(double.Parse(numbers[j]), double.Parse(numbers[j + 1]),
-                        characters[i][0]));
+                    Operations.Add(new Operation(double.Parse(numbers[j]),
+                        double.Parse(numbers[j + 1]), characters[i][0]));
                     i++;
                 }
                 catch (FormatException)
                 {
                     Console.WriteLine("Вырожение введено неверно!");
-                    //Console.WriteLine(_condition);
                     Console.ReadKey();
                     Environment.Exit(0);
                 }
             }
-
             return Operations;
         }
     }
